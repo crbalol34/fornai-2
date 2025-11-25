@@ -62,3 +62,13 @@ plt.xlim(-0.6, len(solos_top10) - 0.4)
 # --- Mostrar en Streamlit ---
 plt.tight_layout()
 st.pyplot(fig)
+
+# Using object notation
+with st.expander("Ver tabla filtrada"):
+    st.dataframe(df_filtrado[["Jugador", "Puntaje solitario", "", "Age", "Pclass", "Fare", "Survived"]])
+#add_selectbox = st.sidebar.selectbox(
+ #   "¿Qué te gustaría saber?",
+  #  ("Player", "Top  1 solitario", "Puntaje solitario", )
+#)
+
+
