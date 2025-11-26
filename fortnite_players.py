@@ -29,6 +29,8 @@ plt.xticks(rotation=90, fontsize=8) # Rotamos etiquetas del eje X si son nombres
 
 #--------------------- nuevo codigo ------------
 
+df_filtrado = df.copy()
+
 
 # 2. Configurar el fondo y la rejilla (Estilo Plotly)
 ax.set_facecolor('#E5ECF6')            # Fondo gris azulado interno
