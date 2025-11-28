@@ -34,7 +34,7 @@ ax1.plot(df_chart.index, df_chart['Solo minutesPlayed'], color=color1, marker='o
 ax1.tick_params(axis='y', labelcolor=color1)
 
 # Configurar las etiquetas del eje X para mostrar los nombres de los jugadores
-ax1.set_xticks(df_chart.index)
+ax1.set_xticks(df_chart.index + 1)
 ax1.set_xticklabels(df_chart['Player'], rotation=90, fontsize=8)
 
 # Eje Y derecho: Solo Top 1 (Línea Roja)
