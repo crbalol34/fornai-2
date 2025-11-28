@@ -59,3 +59,50 @@ df_chart.index = df_chart.index + 1
 
 if st.checkbox("Mostrar datos en tabla"):
 	st.dataframe(df_chart[['Player', 'Solo minutesPlayed', 'Solo top1']])
+
+#   Grafico de tortita
+with tab3:
+    st.subheader("Distribución de Kills por Modo de Juego")
+    
+    try:
+        # 1. Calcular totales
+        total_solo = df_sorted['Solo kills'].sum()
+        total_duo = df_sorted['Duo kills'].sum()
+        total_trio = df_sorted['Trio kills'].sum()
+        total_squad = df_sorted['Squad kills'].sum()
+        
+        # 2. Preparar datos
+        labels = ['Solo', 'Duo', 'Trio', 'Squad']
+        sizes = [total_solo, total_duo, total_trio, total_squad]
+        
+        # Colores personalizados
+        colors = ['#ff9999','#66b3ff','#99ff99','#ffcc99']
+        
+        # 3. Crear gráfico con Matplotlib
+        fig3, ax3 = plt.subplots(figsize=(8, 8))
+        
+        # autopct='%1.1f%%' agrega el porcentaje automáticamente
+        ax3.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%',
+                startangle=90, pctdistance=0.85, explode=(0.05, 0, 0, 0))
+        
+        # Dibujar un círculo blanco en el centro para que parezca una "Dona" (Opcional)
+        centre_circle = plt.Circle((0,0),0.70,fc='white')
+        fig3.gca().add_artist(centre_circle)
+        
+        ax3.axis('equal')  # Asegura que se dibuje como un círculo
+        plt.title(f"Total de Kills (Top {top_n} jugadores)", fontsize=14)
+        
+        st.pyplot(fig3)
+        
+    except KeyError:
+         st.error("⚠️ Error: Faltan columnas de Kills en el CSV.")
+
+# --- TAB 4: DATOS ---
+with tab4:
+    st.subheader("Tabla de Datos Detallada")
+    st.dataframe(df_sorted)
+
+if mostrar_raw:
+    st.write("---")
+    st.write("### Dataset Completo")
+    st.write(df)
