@@ -29,7 +29,7 @@ df_chart.index = df_chart.index + 1
 st.write("### ⏱️ Relación: Minutos Jugados vs Victorias")
 
 # Crear el gráfico con Matplotlib
-fig, ax1 = plt.subplots(figsize=(12, 6))
+fig, ax1 = plt.subplots(figsize=(4, 4))
 
 # Eje Y izquierdo: Solo Minutes Played (Línea Azul)
 color1 = 'tab:blue'
