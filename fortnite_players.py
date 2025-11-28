@@ -20,6 +20,17 @@ df_sorted = df.sort_values(by='Solo minutesPlayed', ascending=False)
 st.sidebar.header("Configuración del Gráfico")
 top_n = st.sidebar.slider("Cantidad de jugadores a mostrar (Top N)", min_value=10, max_value=200, value=50)
 
+# --- PROCESAMIENTO DE DATOS (ESTO ES LO QUE TE FALTA) ---
+
+# 1. Creamos la variable df_sorted ordenando los datos
+df_sorted = df.sort_values(by='Solo minutesPlayed', ascending=False).head(top_n).reset_index(drop=True)
+
+# 2. Ajustamos el índice para que empiece en 1 (Ranking)
+df_sorted.index = df_sorted.index + 1
+
+# 3. Creamos la columna nueva necesaria para los gráficos
+df_sorted['WinsPerHour'] = df_sorted['Solo top1'] / (df_sorted['Solo minutesPlayed'] / 60)
+
 # Filtramos los top N jugadores según la selección
 df_chart = df_sorted.head(top_n).reset_index(drop=True)
 
