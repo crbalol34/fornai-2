@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
 
 df = pd.read_csv("Fortnite_players_stats.csv")
 
@@ -9,68 +10,47 @@ st.write("""
 ## Gráficos usando la base de datos estadística de Fortnite.
 """)
 
-solos_top10 = df[['Player','Solo score']].sort_values('Solo score',ascending=False).head(20)
-
-#df1 = df[['Solo score']]
-#df1 = df1.sort_values(by='Solo score', ascending=False).head(10)
+#--------------grafico de horas x partidas ganadas --------------#
 
 
-fig, ax = plt.subplots(figsize=(12, 6)) 
+# 2. Procesar datos: Ordenar por 'Solo minutesPlayed' de mayor a menor
+df_sorted = df.sort_values(by='Solo minutesPlayed', ascending=False)
 
+# Widget para controlar cuántos jugadores mostrar (para que el gráfico sea legible)
+st.sidebar.header("Configuración del Gráfico")
+top_n = st.sidebar.slider("Cantidad de jugadores a mostrar (Top N)", min_value=10, max_value=200, value=50)
 
-ax.bar(solos_top10.index.astype(str), solos_top10['Solo score'], color='#3498db') 
+# Filtramos los top N jugadores según la selección
+df_chart = df_sorted.head(top_n).reset_index(drop=True)
 
+# 3. Crear el gráfico con Matplotlib
+fig, ax1 = plt.subplots(figsize=(12, 6))
 
-ax.set_title('Top 10 Solo Scores')
-ax.set_xlabel('Índice / Jugador')
-ax.set_ylabel('Score')
-plt.xticks(rotation=90, fontsize=8) # Rotamos etiquetas del eje X si son nombres largos
+# Eje Y izquierdo: Solo Minutes Played (Línea Azul)
+color1 = 'tab:blue'
+ax1.set_xlabel('Jugador')
+ax1.set_ylabel('Minutos Jugados (Solo)', color=color1, fontsize=12)
+ax1.plot(df_chart.index, df_chart['Solo minutesPlayed'], color=color1, marker='o', markersize=4, label='Minutos Jugados')
+ax1.tick_params(axis='y', labelcolor=color1)
 
+# Configurar las etiquetas del eje X para mostrar los nombres de los jugadores
+ax1.set_xticks(df_chart.index)
+ax1.set_xticklabels(df_chart['Player'], rotation=90, fontsize=8)
 
-#--------------------- nuevo codigo ------------
+# Eje Y derecho: Solo Top 1 (Línea Roja)
+ax2 = ax1.twinx()  
+color2 = 'tab:red'
+ax2.set_ylabel('Top 1 (Victorias)', color=color2, fontsize=12)
+ax2.plot(df_chart.index, df_chart['Solo top1'], color=color2, linestyle='--', marker='x', markersize=4, label='Top 1')
+ax2.tick_params(axis='y', labelcolor=color2)
 
-df_filtrado = df.copy()
+# Título y ajustes
+plt.title(f'Relacion: Minutos Jugados vs Victorias (Top {top_n} jugadores)', fontsize=14)
+fig.tight_layout()
 
-
-# 2. Configurar el fondo y la rejilla (Estilo Plotly)
-ax.set_facecolor('#E5ECF6')            # Fondo gris azulado interno
-fig.patch.set_facecolor('white')       # Fondo blanco externo
-ax.grid(axis='y', color='white', linewidth=1) # Rejilla blanca
-ax.set_axisbelow(True)                 # Rejilla detrás de las barras
-
-# 3. Quitar los bordes negros (Spines)
-for spine in ax.spines.values():
-    spine.set_visible(False)
-
-
-max_val = solos_top10['Solo score'].max()
-# Definimos el paso: cada 1 millón (1,000,000)
-step = 1_000_000
-
-
-yticks_values = range(0, int(max_val) + step, step)
-
-
-yticks_labels = [f'{int(y/1_000_000)}M' if y > 0 else '0' for y in yticks_values]
-
-# Aplicamos las marcas y las etiquetas manualmente
-ax.set_yticks(yticks_values)
-ax.set_yticklabels(yticks_labels)
-
-# 4. Ajustes del Eje X
-plt.xticks(rotation=-90, fontsize=9)
-plt.xlim(-0.6, len(solos_top10) - 0.4)
-
-# --- Mostrar en Streamlit ---
-plt.tight_layout()
+# 4. Mostrar en Streamlit
 st.pyplot(fig)
 
-# Using object notation
-with st.expander("Ver tabla filtrada"):
-    st.dataframe(df_filtrado[["Jugador", "Puntaje solitario", "", "Age", "Pclass", "Fare", "Survived"]])
-#add_selectbox = st.sidebar.selectbox(
- #   "¿Qué te gustaría saber?",
-  #  ("Player", "Top  1 solitario", "Puntaje solitario", )
-#)
-
-
+# Mostrar tabla de datos opcional
+if st.checkbox("Mostrar datos en tabla"):
+	st.dataframe(df_chart[['Player', 'Solo minutesPlayed', 'Solo top1']])
