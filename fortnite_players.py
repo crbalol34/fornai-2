@@ -1,159 +1,94 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
 
-# 1. CONFIGURACIÓN DE LA PÁGINA
-st.set_page_config(
-    page_title="Fortnite Analytics",
-    page_icon="🎮",
-    layout="wide"
-)
+# Carga de datos
+df = pd.read_csv("Fortnite_players_stats.csv")
 
-# --- CARGA DE DATOS ---
-try:
-    df = pd.read_csv("Fortnite_players_stats.csv")
-except FileNotFoundError:
-    st.error("⚠️ Error: No se encontró el archivo 'Fortnite_players_stats.csv'.")
-    st.stop()
-
-# --- TÍTULO ---
 st.write("""
-# 🎮 Dashboard de Estadísticas de Fortnite
-## Análisis de rendimiento (Versión Matplotlib)
+# STATS FORTNITE PLAYERS.
+## Gráficos usando la base de datos estadística de Fortnite.
 """)
-st.write("---")
 
-# --- SIDEBAR ---
-with st.sidebar:
-    st.header("⚙️ Configuración")
-    top_n = st.slider("🏆 Cantidad de jugadores (Top N):", 10, 100, 20)
-    mostrar_raw = st.checkbox("Mostrar tabla completa", value=False)
-    st.info("Modo sin librería Plotly activado.")
+#-------------- CONFIGURACIÓN --------------#
+# 2. Procesar datos: Ordenar por 'Solo minutesPlayed' de mayor a menor
+df_sorted = df.sort_values(by='Solo minutesPlayed', ascending=False)
 
-# --- PROCESAMIENTO DE DATOS (IMPORTANTE: Esto define df_sorted) ---
-# 1. Ordenar y filtrar
-df_sorted = df.sort_values(by='Solo minutesPlayed', ascending=False).head(top_n).reset_index(drop=True)
+# Widget para controlar cuántos jugadores mostrar
+st.sidebar.header("Configuración del Gráfico")
+top_n = st.sidebar.slider("Cantidad de jugadores a mostrar (Top N)", min_value=10, max_value=200, value=50)
 
-# 2. Ajustar índice (Empieza en 1)
-df_sorted.index = df_sorted.index + 1
+# Filtramos los top N jugadores según la selección
+df_chart = df_sorted.head(top_n).reset_index(drop=True)
 
-# 3. Crear columna nueva (KPI de eficiencia)
-df_sorted['WinsPerHour'] = df_sorted['Solo top1'] / (df_sorted['Solo minutesPlayed'] / 60)
+# Ajuste para que el ranking empiece en 1
+df_chart.index = df_chart.index + 1
 
-# --- KPIs ---
-col1, col2, col3 = st.columns(3)
-promedio_mins = df_sorted['Solo minutesPlayed'].mean()
-total_wins = df_sorted['Solo top1'].sum()
-total_kills_global = df_sorted['Solo kills'].sum()
+#-------------- GRÁFICO 1: HORAS X PARTIDAS GANADAS (LINEAL) --------------#
+st.write("### ⏱️ Relación: Minutos Jugados vs Victorias")
 
-col1.metric("⏱️ Promedio Minutos", f"{promedio_mins:,.0f} min")
-col2.metric("🏆 Total Victorias Solo", f"{total_wins}")
-col3.metric("💀 Total Kills Solo", f"{total_kills_global}")
+# Crear el gráfico con Matplotlib
+fig, ax1 = plt.subplots(figsize=(12, 6))
 
-st.write("---")
+# Eje Y izquierdo: Solo Minutes Played (Línea Azul)
+color1 = 'tab:blue'
+ax1.set_xlabel('Ranking del Jugador')
+ax1.set_ylabel('Minutos Jugados (Solo)', color=color1, fontsize=12)
+ax1.plot(df_chart.index, df_chart['Solo minutesPlayed'], color=color1, marker='o', markersize=4, label='Minutos Jugados')
+ax1.tick_params(axis='y', labelcolor=color1)
 
-# --- PESTAÑAS ---
-tab1, tab2, tab3, tab4 = st.tabs([
-    "📊 Tiempo vs Victorias", 
-    "🚀 Eficiencia", 
-    "🍕 Distribución de Kills", 
-    "📋 Datos"
-])
+# Configurar las etiquetas del eje X
+ax1.set_xticks(df_chart.index)
+ax1.set_xticklabels(df_chart['Player'], rotation=90, fontsize=8)
 
-# --- TAB 1: GRÁFICO DUAL (Matplotlib) ---
-with tab1:
-    st.subheader("Relación: Tiempo invertido vs Victorias")
-    plt.style.use('ggplot') 
+# Eje Y derecho: Solo Top 1 (Línea Roja)
+ax2 = ax1.twinx()  
+color2 = 'tab:red'
+ax2.set_ylabel('Top 1 (Victorias)', color=color2, fontsize=12)
+ax2.plot(df_chart.index, df_chart['Solo top1'], color=color2, linestyle='--', marker='x', markersize=4, label='Top 1')
+ax2.tick_params(axis='y', labelcolor=color2)
+
+plt.title(f'Top {top_n} Jugadores: Tiempo vs Victorias', fontsize=14)
+fig.tight_layout()
+
+# Mostrar gráfico 1
+st.pyplot(fig)
+
+st.write("---") # Línea separadora
+
+#-------------- GRÁFICO 2: GRÁFICO DE TORTA (KILLS) --------------#
+st.write("### 🍕 Distribución de Kills por Modo de Juego")
+st.write(f"Total de muertes acumuladas por los **Top {top_n}** jugadores.")
+
+try:
+    # 1. Calculamos la suma total de kills por cada columna
+    total_solo = df_chart['Solo kills'].sum()
+    total_duo = df_chart['Duo kills'].sum()
+    total_trio = df_chart['Trio kills'].sum()
+    total_squad = df_chart['Squad kills'].sum()
+
+    # 2. Preparamos los datos para el gráfico
+    etiquetas = ['Solo', 'Duo', 'Trio', 'Squad']
+    totales = [total_solo, total_duo, total_trio, total_squad]
+    colores = ['#ff9999','#66b3ff','#99ff99','#ffcc99'] # Rojo suave, Azul suave, Verde suave, Naranja suave
+
+    # 3. Creamos el gráfico de torta
+    fig2, ax_pie = plt.subplots(figsize=(8, 8))
     
-    fig, ax1 = plt.subplots(figsize=(14, 7))
+    # autopct='%1.1f%%' muestra el porcentaje con 1 decimal
+    ax_pie.pie(totales, labels=etiquetas, colors=colores, autopct='%1.1f%%', startangle=140)
+    
+    ax_pie.axis('equal')  # Para que salga redondo y no ovalado
+    plt.title("Proporción de Kills Totales", fontsize=14)
 
-    color1 = 'tab:blue'
-    ax1.set_xlabel('Ranking del Jugador', fontsize=12)
-    ax1.set_ylabel('Minutos Jugados', color=color1, fontsize=14)
-    ax1.bar(df_sorted.index, df_sorted['Solo minutesPlayed'], color=color1, alpha=0.6, label='Minutos')
-    ax1.tick_params(axis='y', labelcolor=color1)
-    
-    ax1.set_xticks(df_sorted.index)
-    ax1.set_xticklabels(df_sorted['Player'], rotation=45, ha="right", fontsize=9)
-
-    ax2 = ax1.twinx()  
-    color2 = 'tab:red'
-    ax2.set_ylabel('Victorias (Top 1)', color=color2, fontsize=14)
-    ax2.plot(df_sorted.index, df_sorted['Solo top1'], color=color2, linewidth=3, marker='o', label='Victorias')
-    ax2.tick_params(axis='y', labelcolor=color2)
-
-    plt.title(f"Comparativa Top {top_n} Jugadores", fontsize=16)
-    fig.tight_layout()
-    st.pyplot(fig)
-
-# --- TAB 2: SCATTER (Matplotlib) ---
-with tab2:
-    st.subheader("Análisis de Eficiencia")
-    
-    fig2, ax = plt.subplots(figsize=(10, 6))
-    
-    # Creamos el scatter plot
-    scatter = ax.scatter(
-        df_sorted["Solo minutesPlayed"], 
-        df_sorted["Solo top1"], 
-        s=df_sorted["WinsPerHour"] * 200, 
-        c=df_sorted["WinsPerHour"], 
-        cmap="viridis", 
-        alpha=0.7,
-        edgecolors="black"
-    )
-    
-    ax.set_xlabel("Minutos Jugados")
-    ax.set_ylabel("Victorias (Top 1)")
-    ax.set_title("Eficiencia: Minutos vs Victorias (Tamaño = Eficiencia)")
-    
-    cbar = plt.colorbar(scatter, ax=ax)
-    cbar.set_label('Victorias por Hora')
-    
+    # Mostrar gráfico 2
     st.pyplot(fig2)
 
-# --- TAB 3: GRÁFICO DE TORTA (Matplotlib) ---
-with tab3:
-    st.subheader("Distribución de Kills por Modo de Juego")
-    
-    try:
-        # 1. Calcular totales
-        total_solo = df_sorted['Solo kills'].sum()
-        total_duo = df_sorted['Duo kills'].sum()
-        total_trio = df_sorted['Trio kills'].sum()
-        total_squad = df_sorted['Squad kills'].sum()
-        
-        # 2. Preparar datos
-        labels = ['Solo', 'Duo', 'Trio', 'Squad']
-        sizes = [total_solo, total_duo, total_trio, total_squad]
-        
-        # Colores personalizados
-        colors = ['#ff9999','#66b3ff','#99ff99','#ffcc99']
-        
-        # 3. Crear gráfico
-        fig3, ax3 = plt.subplots(figsize=(8, 8))
-        
-        ax3.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%',
-                startangle=90, pctdistance=0.85, explode=(0.05, 0, 0, 0))
-        
-        # Círculo blanco para efecto "Dona"
-        centre_circle = plt.Circle((0,0),0.70,fc='white')
-        fig3.gca().add_artist(centre_circle)
-        
-        ax3.axis('equal') 
-        plt.title(f"Total de Kills (Top {top_n} jugadores)", fontsize=14)
-        
-        st.pyplot(fig3)
-        
-    except KeyError:
-         st.error("⚠️ Error: Faltan columnas de Kills en el CSV.")
+except KeyError:
+    st.error("⚠️ Error: No se encontraron las columnas de 'kills' en el archivo CSV. Verifica los nombres.")
 
-# --- TAB 4: DATOS ---
-with tab4:
-    st.subheader("Tabla de Datos Detallada")
-    st.dataframe(df_sorted)
-
-if mostrar_raw:
-    st.write("---")
-    st.write("### Dataset Completo")
-    st.write(df)
+#-------------- TABLA DE DATOS --------------#
+st.write("---")
+if st.checkbox("Mostrar datos en tabla"):
+	st.dataframe(df_chart)
