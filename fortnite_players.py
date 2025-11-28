@@ -29,7 +29,7 @@ df_chart.index = df_chart.index + 1
 st.write("### ⏱️ Relación: Minutos Jugados vs Victorias")
 
 # Crear el gráfico con Matplotlib
-fig, ax1 = plt.subplots(figsize=(4, 4))
+fig, ax1 = plt.subplots(figsize=(12, 6))
 
 # Eje Y izquierdo: Solo Minutes Played (Línea Azul)
 color1 = 'tab:blue'
@@ -74,7 +74,7 @@ try:
     colores = ['#ff9999','#66b3ff','#99ff99','#ffcc99'] # Rojo, Azul, Verde, Naranja
 
     # 3. Creamos el gráfico de torta
-    fig2, ax_pie = plt.subplots(figsize=(8, 8))
+    fig2, ax_pie = plt.subplots(figsize=(4, 4))
     
     # autopct='%1.1f%%' muestra el porcentaje con 1 decimal
     ax_pie.pie(totales, labels=etiquetas, colors=colores, autopct='%1.1f%%', startangle=140)
