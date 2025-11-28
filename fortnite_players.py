@@ -74,7 +74,7 @@ try:
     colores = ['#FF9999', '#66B3FF', '#99FF99', '#FFCC99']
 
     # 2. Configuración de la Figura (Más ancha para que quepa la leyenda)
-    fig2, ax_pie = plt.subplots(figsize=(10, 6))
+    fig2, ax_pie = plt.subplots(figsize=(10, 4))
 
     # 3. Creamos el gráfico SIN LABELS (para que no se amontonen)
     # 'wedges' son los trozos, 'texts' los textos autogenerados
