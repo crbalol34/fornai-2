@@ -57,38 +57,55 @@ st.pyplot(fig)
 
 st.write("---") # Línea separadora
 
-#-------------- GRÁFICO 2: GRÁFICO DE TORTA (KILLS) --------------#
+#-------------- GRÁFICO 2: GRÁFICO DE TORTA (ESTILO DONA PRO) --------------#
 st.write("### 🍕 Distribución de Kills por Modo de Juego")
 st.write(f"Total de muertes acumuladas por los **Top {top_n}** jugadores.")
 
 try:
-    # 1. Calculamos la suma total de kills (Ahora sí con TRIOS)
+    # 1. Calculamos los datos
     total_solo = df_chart['Solo kills'].sum()
-    total_duo = df_chart['Duos kills'].sum()   # Ojo: En tu archivo es 'Duos', no 'Duo'
-    total_trio = df_chart['Trios kills'].sum() # Ojo: En tu archivo es 'Trios', no 'Trio'
-    total_squad = df_chart['Squads kills'].sum() # Ojo: En tu archivo es 'Squads'
+    total_duo = df_chart['Duos kills'].sum()
+    total_trio = df_chart['Trios kills'].sum()
+    total_squad = df_chart['Squads kills'].sum()
 
-    # 2. Preparamos los datos para el gráfico
     etiquetas = ['Solo', 'Duos', 'Trios', 'Squads']
     totales = [total_solo, total_duo, total_trio, total_squad]
-    colores = ['#ff9999','#66b3ff','#99ff99','#ffcc99'] # Rojo, Azul, Verde, Naranja
+    # Colores más suaves y profesionales
+    colores = ['#FF9999', '#66B3FF', '#99FF99', '#FFCC99']
 
-    # 3. Creamos el gráfico de torta
-    fig2, ax_pie = plt.subplots(figsize=(2, 2))
-    
-    # autopct='%1.1f%%' muestra el porcentaje con 1 decimal
-    ax_pie.pie(totales, labels=etiquetas, colors=colores, autopct='%1.1f%%', startangle=140)
-    
-    ax_pie.axis('equal')  # Para que salga redondo y no ovalado
-    plt.title("Proporción de Kills Totales", fontsize=14)
+    # 2. Configuración de la Figura (Más ancha para que quepa la leyenda)
+    fig2, ax_pie = plt.subplots(figsize=(10, 6))
 
-    # Mostrar gráfico 2
+    # 3. Creamos el gráfico SIN LABELS (para que no se amontonen)
+    # 'wedges' son los trozos, 'texts' los textos autogenerados
+    wedges, texts, autotexts = ax_pie.pie(
+        totales, 
+        colors=colores, 
+        autopct='%1.1f%%', # Formato del porcentaje
+        startangle=90, 
+        pctdistance=0.85, # Mueve los porcentajes hacia el borde
+        textprops=dict(color="black") # Color del texto de porcentaje
+    )
+
+    # 4. TRUCO DE LA DONA: Círculo blanco en el centro
+    centre_circle = plt.Circle((0,0), 0.70, fc='white')
+    fig2.gca().add_artist(centre_circle)
+
+    # 5. LEYENDA LATERAL (Aquí está la magia para que no se vea horrible)
+    ax_pie.legend(
+        wedges, 
+        etiquetas,
+        title="Modos de Juego",
+        loc="center left",
+        bbox_to_anchor=(1, 0, 0.5, 1) # Esto saca la leyenda fuera del gráfico
+    )
+
+    ax_pie.axis('equal')  
+    plt.title("Proporción de Kills Totales", fontsize=16)
+    plt.tight_layout()
+
+    # Mostrar gráfico
     st.pyplot(fig2)
 
 except KeyError as e:
-    st.error(f"⚠️ Error: No se encontró la columna {e} en el archivo CSV. Revisa los nombres exactos.")
-
-#-------------- TABLA DE DATOS --------------#
-st.write("---")
-if st.checkbox("Mostrar datos en tabla"):
-    st.dataframe(df_chart)
+    st.error(f"⚠️ Error: Falta la columna {e}. Revisa el archivo.")
