@@ -134,5 +134,3 @@ with col_lateral:
 st.write("---")
 if st.checkbox("Mostrar datos en tabla"):
     st.dataframe(df_chart[['Player', 'Solo minutesPlayed', 'Solo top1', 'Solo kills']])
-except KeyError as e:
-    st.error(f"⚠️ Error: Falta la columna {e}. Revisa el archivo.")
