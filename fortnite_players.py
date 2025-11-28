@@ -23,6 +23,9 @@ top_n = st.sidebar.slider("Cantidad de jugadores a mostrar (Top N)", min_value=1
 # Filtramos los top N jugadores según la selección
 df_chart = df_sorted.head(top_n).reset_index(drop=True)
 
+#para que parta de 1 en teoría
+df_chart.index = df_chart.index + 1
+
 # 3. Crear el gráfico con Matplotlib
 fig, ax1 = plt.subplots(figsize=(12, 6))
 
@@ -34,7 +37,7 @@ ax1.plot(df_chart.index, df_chart['Solo minutesPlayed'], color=color1, marker='o
 ax1.tick_params(axis='y', labelcolor=color1)
 
 # Configurar las etiquetas del eje X para mostrar los nombres de los jugadores
-ax1.set_xticks(df_chart.index + 1)
+ax1.set_xticks(df_chart.index)
 ax1.set_xticklabels(df_chart['Player'], rotation=90, fontsize=8)
 
 # Eje Y derecho: Solo Top 1 (Línea Roja)
