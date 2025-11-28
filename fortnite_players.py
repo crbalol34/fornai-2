@@ -71,7 +71,7 @@ try:
     etiquetas = ['Solo', 'Duos', 'Trios', 'Squads']
     totales = [total_solo, total_duo, total_trio, total_squad]
     # Colores más suaves y profesionales
-    colores = ['#F52C05', '#F52C05', '#05EDF5', '#F50591']
+    colores = ['#F52C05', '#FFF93D', '#05EDF5', '#F50591']
 
     # 2. Configuración de la Figura (Más ancha para que quepa la leyenda)
     fig2, ax_pie = plt.subplots(figsize=(10, 4))
