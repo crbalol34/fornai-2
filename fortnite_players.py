@@ -62,16 +62,16 @@ st.write("### 🍕 Distribución de Kills por Modo de Juego")
 st.write(f"Total de muertes acumuladas por los **Top {top_n}** jugadores.")
 
 try:
-    # 1. Calculamos la suma total de kills por cada columna
+    # 1. Calculamos la suma total de kills (Ahora sí con TRIOS)
     total_solo = df_chart['Solo kills'].sum()
-    total_duo = df_chart['Duo kills'].sum()
-    total_trio = df_chart['Trio kills'].sum()
-    total_squad = df_chart['Squad kills'].sum()
+    total_duo = df_chart['Duos kills'].sum()   # Ojo: En tu archivo es 'Duos', no 'Duo'
+    total_trio = df_chart['Trios kills'].sum() # Ojo: En tu archivo es 'Trios', no 'Trio'
+    total_squad = df_chart['Squads kills'].sum() # Ojo: En tu archivo es 'Squads'
 
     # 2. Preparamos los datos para el gráfico
-    etiquetas = ['Solo', 'Duo', 'Trio', 'Squad']
+    etiquetas = ['Solo', 'Duos', 'Trios', 'Squads']
     totales = [total_solo, total_duo, total_trio, total_squad]
-    colores = ['#ff9999','#66b3ff','#99ff99','#ffcc99'] # Rojo suave, Azul suave, Verde suave, Naranja suave
+    colores = ['#ff9999','#66b3ff','#99ff99','#ffcc99'] # Rojo, Azul, Verde, Naranja
 
     # 3. Creamos el gráfico de torta
     fig2, ax_pie = plt.subplots(figsize=(8, 8))
@@ -85,10 +85,10 @@ try:
     # Mostrar gráfico 2
     st.pyplot(fig2)
 
-except KeyError:
-    st.error("⚠️ Error: No se encontraron las columnas de 'kills' en el archivo CSV. Verifica los nombres.")
+except KeyError as e:
+    st.error(f"⚠️ Error: No se encontró la columna {e} en el archivo CSV. Revisa los nombres exactos.")
 
 #-------------- TABLA DE DATOS --------------#
 st.write("---")
 if st.checkbox("Mostrar datos en tabla"):
-	st.dataframe(df_chart)
+    st.dataframe(df_chart)
