@@ -74,7 +74,7 @@ try:
     colores = ['#ff9999','#66b3ff','#99ff99','#ffcc99'] # Rojo, Azul, Verde, Naranja
 
     # 3. Creamos el gráfico de torta
-    fig2, ax_pie = plt.subplots(figsize=(4, 4))
+    fig2, ax_pie = plt.subplots(figsize=(2, 2))
     
     # autopct='%1.1f%%' muestra el porcentaje con 1 decimal
     ax_pie.pie(totales, labels=etiquetas, colors=colores, autopct='%1.1f%%', startangle=140)
